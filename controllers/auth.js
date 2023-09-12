@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import { uploadImage } from "../utils/cloudinary.js";
+import fs from 'fs-extra'
 
 /* REGISTER USER */
 export const register = async (req, res) => {
@@ -10,7 +12,6 @@ export const register = async (req, res) => {
       lastName,
       email,
       password,
-      picturePath,
       friends,
       location,
       occupation,
@@ -18,6 +19,21 @@ export const register = async (req, res) => {
 
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
+
+    let picturePath = {};
+
+    if (req.file) {
+      const cloudinaryResponse = await uploadImage(req.file.path);
+
+      console.log(cloudinaryResponse);
+
+      picturePath = {
+        public_id: cloudinaryResponse.public_id,
+        secure_url: cloudinaryResponse.secure_url,
+      };
+
+      fs.unlinkSync(req.file.path);
+    }
 
     const newUser = new User({
       firstName,
