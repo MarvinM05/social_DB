@@ -44,6 +44,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+app.get("/ping", (req, res) => {
+  res.status(200).json({ message: "Server is awake!" });
+});
+
 /* ROUTES WITH FILES */
 app.post("/auth/register", upload.single("picture"), register);
 app.post("/posts",verifyToken, upload.single("picture"), createPost);
